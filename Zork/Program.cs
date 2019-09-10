@@ -2,7 +2,7 @@
 
 namespace Zork
 {
-    class Zork
+    class Program
     {
         static void Main(string[] args)
         {
