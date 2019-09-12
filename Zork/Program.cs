@@ -8,26 +8,45 @@ namespace Zork
         {
             Console.WriteLine("Welcome to Zork!");
 
-            string inputString = Console.ReadLine();
-            inputString = inputString.ToUpper();
-            Commands command = ToCommand(inputString.Trim().ToUpper());
-            Console.WriteLine(command);
-
-            // From Section 2
-            {/*switch (inputString)
+            Commands command = Commands.UNKNOWN;
+            while (command != Commands.QUIT)
             {
-                case "QUIT":
-                    Console.WriteLine("Thank you for playing.");
-                    break;
+                Console.Write("> ");
+                command = ToCommand(Console.ReadLine().Trim());
 
-                case "LOOK":
-                    Console.WriteLine("This is an open field west of a white house, with a boarded front door.\nA rubber mat saying 'Welcome to Zork!'  lies by the door");
-                    break;
+                string outputString;
+                switch(command)
+                {
+                    case Commands.LOOK:
+                        outputString = "A rubber mat saying 'Welcome to Zork!' lies by the door.";
+                        break;
 
-                default:
-                    Console.WriteLine("Unrecognized command");
-                    break;
-            }*/
+                    case Commands.NORTH:
+                        outputString = "You moved NORTH";
+                        break;
+
+                    case Commands.SOUTH:
+                        outputString = "You moved SOUTH";
+                        break;
+
+                    case Commands.EAST:
+                        outputString = "You moved EAST";
+                        break;
+
+                    case Commands.WEST:
+                        outputString = "You Moved WEST";
+                        break;
+
+                    case Commands.QUIT:
+                        outputString = "Thank you for playing!";
+                        break;
+
+                    default:
+                        outputString = "Unknown command";
+                        break;
+                }
+
+                Console.WriteLine(outputString);
             }
         }
 
@@ -35,5 +54,8 @@ namespace Zork
         {
             return Enum.TryParse(commandString, true, out Commands result) ? result : Commands.UNKNOWN;
         }
+
+        // Expression-bodied method version
+        //private static Commands ToCommand(string commandString) => Enum.TryParse(commandString, true, out Commands result) ? result : Commands.UNKNOWN;
     }
 }
