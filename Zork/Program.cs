@@ -10,8 +10,11 @@ namespace Zork
 
             string inputString = Console.ReadLine();
             inputString = inputString.ToUpper();
+            Commands command = ToCommand(inputString.Trim().ToUpper());
+            Console.WriteLine(command);
 
-            switch (inputString)
+            // From Section 2
+            {/*switch (inputString)
             {
                 case "QUIT":
                     Console.WriteLine("Thank you for playing.");
@@ -24,7 +27,14 @@ namespace Zork
                 default:
                     Console.WriteLine("Unrecognized command");
                     break;
+            }*/
             }
         }
+
+        private static Commands ToCommand(string commandString)
+        {
+            return Enum.TryParse(commandString, true, out Commands result) ? result : Commands.UNKNOWN;
+        }
+    }
     }
 }
