@@ -102,6 +102,8 @@ namespace Zork
         // Handles moving between rooms
         private static bool Move(Commands command)
         {
+            Assert.IsTrue(IsDirection(command), "Invalid direction.");
+
             bool result;
 
             if (!Directions.Contains(command))
@@ -115,11 +117,11 @@ namespace Zork
                     Location.Row--;
                     result = true;
                     break;
-                case Commands.NORTH when Location.Row < Rooms.GetLength(Location.Column) - 1:
+                case Commands.NORTH when Location.Row < Rooms.GetLength(0) - 1:
                     Location.Row++;
                     result = true;
                     break;
-                case Commands.EAST when Location.Column < Rooms.GetLength(Location.Row) - 1:
+                case Commands.EAST when Location.Column < Rooms.GetLength(1) - 1:
                     Location.Column++;
                     result = true;
                     break;
@@ -129,7 +131,6 @@ namespace Zork
                     break;
                 default:
                     result = false;
-                    //throw new ArgumentException();
                     break;
             }
 
@@ -147,7 +148,6 @@ namespace Zork
 
         private static (int Row, int Column) IndexOf(string[,] values, string valueToFind)
         {
-
             for (int row = 0; row < values.GetLength(0); row++)
             {
                 for (int column = 0; column < values.GetLength(1); column++)
@@ -161,6 +161,16 @@ namespace Zork
 
             return (-1, -1);
 
+        }
+
+        private static bool IsDirection(Commands command) => Directions.Contains(command);
+
+        private static string CurrentRoom
+        {
+            get
+            {
+                return Rooms[Location.Row, Location.Column];
+            }
         }
 
     }
