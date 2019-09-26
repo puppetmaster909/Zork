@@ -5,8 +5,16 @@ namespace Zork
 {
     class Program
     {
-        private static readonly string[] _Rooms = { "Forest", "West of House", "Behind House", "Clearing", "Canyon View" };
-        private static int _currentRoom = 1;
+        private static readonly string[,] Rooms = {
+            { "Rocky Trail", "South of House", "Canyon View" },
+            { "Forest", "West of House", "Behind House" },
+            { "Dense Wooods", "North of House", "Clearing" }
+        };
+
+        //private static int LocationColumn = 1;
+        //private static int LocationRow = 2;
+
+        private static (int Row, int Column) Location = (1,1);
         private static List<Commands> Directions = new List<Commands>()
         {
             Commands.NORTH,
@@ -20,9 +28,10 @@ namespace Zork
             Console.WriteLine("Welcome to Zork!");
 
             Commands command = Commands.UNKNOWN;
+
             while (command != Commands.QUIT)
             {
-                Console.WriteLine(_Rooms[_currentRoom]);
+                Console.WriteLine(Rooms[Location.Row, Location.Column]);
                 Console.Write("> ");
                 command = ToCommand(Console.ReadLine().Trim());
 
@@ -77,7 +86,7 @@ namespace Zork
                 }
                 Console.WriteLine(outputString);
 
-                Move(command);
+                //Move(command);
             }
         }
 
@@ -102,23 +111,57 @@ namespace Zork
 
             switch (command)
             {
-                case Commands.NORTH:
-                case Commands.SOUTH:
-                    result = false;
-                    break;
-                case Commands.EAST when _currentRoom < _Rooms.Length - 1:
-                    _currentRoom++;
+                case Commands.SOUTH when Location.Row > 0:
+                    Location.Row--;
                     result = true;
                     break;
-                case Commands.WEST when _currentRoom > 0:
-                    _currentRoom--;
+                case Commands.NORTH when Location.Row < Rooms.GetLength(Location.Column) - 1:
+                    Location.Row++;
+                    result = true;
+                    break;
+                case Commands.EAST when Location.Column < Rooms.GetLength(Location.Row) - 1:
+                    Location.Column++;
+                    result = true;
+                    break;
+                case Commands.WEST when Location.Column > 0:
+                    Location.Column--;
                     result = true;
                     break;
                 default:
-                    throw new ArgumentException();
+                    result = false;
+                    //throw new ArgumentException();
+                    break;
             }
 
             return result;
         }
+
+        private static void SpawnPlayer(string roomName)
+        {
+            (Location.Row, Location.Column) = IndexOf(Rooms, roomName);
+            if ((Location.Row, Location.Column) == (-1, -1));
+            {
+                throw new Exception($"Did not find room: {roomName}");
+            }
+        }
+
+        private static (int Row, int Column) IndexOf(string[,] values, string valueToFind)
+        {
+
+            for (int row = 0; row < values.GetLength(0); row++)
+            {
+                for (int column = 0; column < values.GetLength(1); column++)
+                {
+                    if (valueToFind == values[row, column])
+                    {
+                        return (row, column);
+                    }
+                }
+            }
+
+            return (-1, -1);
+
+        }
+
     }
 }
