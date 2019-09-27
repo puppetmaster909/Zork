@@ -11,26 +11,31 @@ namespace Zork
             { new Room("Dense Woods"), new Room("North of House"), new Room("Clearing") }
         };
 
-        private static void InitializeRoomDescriptions()
+        private static readonly Dictionary<string, Room> RoomMap;
+
+        static Program()
         {
-            var roomMap = new Dictionary<string, Room>();
+            RoomMap = new Dictionary<string, Room>();
             foreach (Room room in Rooms)
             {
-                roomMap.Add(room.Name, room);
+                RoomMap.Add(room.Name, room);
             }
-
-            roomMap["Rocky Trail"].Description = "You are on a rock-strewn trail.";                                                                                 // Rocky Trail
-            roomMap["South of House"].Description = "You are facing the south side of a whilte house. There is no door here, and all the windows are barred.";      // South of House
-            roomMap["Canyon View"].Description = "You are at the top of the Great Canyon on its south wall.";                                                       // Canyon View
-            roomMap["Forest"].Description = "This is a forest, with trees in all directions around you.";                                                           // Forest
-            roomMap["West of House"].Description = "This is an open field west of a white house, with a boarded front door.";                                       // West of House
-            roomMap["Behind House"].Description = "You are behind the white house. In one corner of the house there is a small window which is slightly ajar.";     // Behind House
-            roomMap["Dense Woods"].Description = "This is a dimly lit forest, with large trees all around. To the east, there appears to be sunlight.";             // Dense Woods
-            roomMap["North of House"].Description = "You are facing the north side of a white house. There is no door here, and all the windows are barred.";       // North of House
-            roomMap["Clearing"].Description = "You are in a clearing, with a forest surrounding you on the west and south.";                                        // Clearing
         }
 
-        private static (int Row, int Column) Location = (1,1);
+        private static void InitializeRoomDescriptions()
+        {
+            RoomMap["Rocky Trail"].Description = "You are on a rock-strewn trail.";                                                                                 // Rocky Trail
+            RoomMap["South of House"].Description = "You are facing the south side of a whilte house. There is no door here, and all the windows are barred.";      // South of House
+            RoomMap["Canyon View"].Description = "You are at the top of the Great Canyon on its south wall.";                                                       // Canyon View
+            RoomMap["Forest"].Description = "This is a forest, with trees in all directions around you.";                                                           // Forest
+            RoomMap["West of House"].Description = "This is an open field west of a white house, with a boarded front door.";                                       // West of House
+            RoomMap["Behind House"].Description = "You are behind the white house. In one corner of the house there is a small window which is slightly ajar.";     // Behind House
+            RoomMap["Dense Woods"].Description = "This is a dimly lit forest, with large trees all around. To the east, there appears to be sunlight.";             // Dense Woods
+            RoomMap["North of House"].Description = "You are facing the north side of a white house. There is no door here, and all the windows are barred.";       // North of House
+            RoomMap["Clearing"].Description = "You are in a clearing, with a forest surrounding you on the west and south.";                                        // Clearing
+        }
+
+        private static (int Row, int Column) Location = (1, 1);
 
         public static Room CurrentRoom
         {
@@ -53,6 +58,9 @@ namespace Zork
             Console.WriteLine("Welcome to Zork!");
             InitializeRoomDescriptions();
 
+            Location = IndexOf(Rooms, "West of House");
+            Assert.IsTrue(Location != (-1, -1));
+
             Room previousRoom = null;
             Commands command = Commands.UNKNOWN;
             while (command != Commands.QUIT)
@@ -68,7 +76,7 @@ namespace Zork
                 Console.Write("> ");
                 command = ToCommand(Console.ReadLine().Trim());
 
-                switch(command)
+                switch (command)
                 {
                     case Commands.QUIT:
                         Console.WriteLine("Thank you for playing!");
@@ -78,8 +86,8 @@ namespace Zork
                         Console.WriteLine(CurrentRoom.Description);
                         break;
 
-                   // Expanded cases
-                   {/*case Commands.NORTH:
+                        // Expanded cases
+                        {/*case Commands.NORTH:
                         outputString = "You moved NORTH";
                         break;
 
@@ -94,7 +102,7 @@ namespace Zork
                     case Commands.WEST:
                         outputString = "You Moved WEST";
                         break;*/
-                   }
+                        }
 
                     // Fall-through cases
                     case Commands.NORTH:
@@ -178,13 +186,13 @@ namespace Zork
             }
         }*/
 
-        private static (int Row, int Column) IndexOf(string[,] values, string valueToFind)
+        private static (int Row, int Column) IndexOf(Room[,] values, string valueToFind)
         {
             for (int row = 0; row < values.GetLength(0); row++)
             {
                 for (int column = 0; column < values.GetLength(1); column++)
                 {
-                    if (valueToFind == values[row, column])
+                    if (valueToFind == values[row, column].Name)
                     {
                         return (row, column);
                     }
