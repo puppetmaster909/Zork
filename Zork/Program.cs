@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Zork
 {
@@ -22,17 +23,39 @@ namespace Zork
             }
         }
 
-        private static void InitializeRoomDescriptions()
+        private static void InitializeRoomDescriptions(string roomsFileName)
         {
-            RoomMap["Rocky Trail"].Description = "You are on a rock-strewn trail.";                                                                                 // Rocky Trail
-            RoomMap["South of House"].Description = "You are facing the south side of a whilte house. There is no door here, and all the windows are barred.";      // South of House
-            RoomMap["Canyon View"].Description = "You are at the top of the Great Canyon on its south wall.";                                                       // Canyon View
-            RoomMap["Forest"].Description = "This is a forest, with trees in all directions around you.";                                                           // Forest
-            RoomMap["West of House"].Description = "This is an open field west of a white house, with a boarded front door.";                                       // West of House
-            RoomMap["Behind House"].Description = "You are behind the white house. In one corner of the house there is a small window which is slightly ajar.";     // Behind House
-            RoomMap["Dense Woods"].Description = "This is a dimly lit forest, with large trees all around. To the east, there appears to be sunlight.";             // Dense Woods
-            RoomMap["North of House"].Description = "You are facing the north side of a white house. There is no door here, and all the windows are barred.";       // North of House
-            RoomMap["Clearing"].Description = "You are in a clearing, with a forest surrounding you on the west and south.";                                        // Clearing
+            const string fieldDelimiter = "##";
+            const int expectedFieldCount = 2;
+
+            string[] lines = File.ReadAllLines(roomsFileName);
+            foreach (string line in lines)
+            {
+                string[] fields = line.Split(fieldDelimiter);
+                if (fields.Length != expectedFieldCount)
+                {
+                    throw new InvalidDataException("Invalid record.");
+                }
+
+                string name = fields[(int)Fields.Name];
+                string description = fields[(int)Fields.Description];
+
+                RoomMap[name].Description = description;
+            }
+
+            // LINQ version
+            {/*const string fieldDelimiter = "##";
+            const int expectedFieldCount = 2;
+            var roomQuery = from line in File.ReadLines(roomsFileName)
+                            let fields = line.Split(fieldDelimiter)
+                            where fields.Length == expectedFieldCount
+                            select (Name: fields[(int)Fields.Description]);
+
+            foreach (var (Name, Description) in roomQuery)
+            {
+                RoomMap[Name].Description = Description;
+            }*/
+            }
         }
 
         private static (int Row, int Column) Location = (1, 1);
@@ -53,10 +76,24 @@ namespace Zork
             Commands.WEST
         };
 
+        private enum Fields
+        {
+            Name = 0,
+            Description
+        }
+
+        private enum CommandLineArguments
+        {
+            RoomsFileName = 0
+        }
+
         static void Main(string[] args)
         {
             Console.WriteLine("Welcome to Zork!");
-            InitializeRoomDescriptions();
+
+            string defaultRoomsFileName = "Rooms.txt";
+            string roomsFileName = (args.Length > 0 ? args[(int)CommandLineArguments.RoomsFileName] : defaultRoomsFileName);
+            InitializeRoomDescriptions(roomsFileName);
 
             Location = IndexOf(Rooms, "West of House");
             Assert.IsTrue(Location != (-1, -1));
@@ -86,24 +123,6 @@ namespace Zork
                         Console.WriteLine(CurrentRoom.Description);
                         break;
 
-                        // Expanded cases
-                        {/*case Commands.NORTH:
-                        outputString = "You moved NORTH";
-                        break;
-
-                    case Commands.SOUTH:
-                        outputString = "You moved SOUTH";
-                        break;
-
-                    case Commands.EAST:
-                        outputString = "You moved EAST";
-                        break;
-
-                    case Commands.WEST:
-                        outputString = "You Moved WEST";
-                        break;*/
-                        }
-
                     // Fall-through cases
                     case Commands.NORTH:
                     case Commands.SOUTH:
@@ -124,9 +143,6 @@ namespace Zork
                         Console.WriteLine("Unknown command");
                         break;
                 }
-                //Console.WriteLine(outputString);
-
-                //Move(command);
             }
         }
 
@@ -135,9 +151,6 @@ namespace Zork
         {
             return Enum.TryParse(commandString, true, out Commands result) ? result : Commands.UNKNOWN;
         }
-
-        // Expression-bodied method version
-        //private static Commands ToCommand(string commandString) => Enum.TryParse(commandString, true, out Commands result) ? result : Commands.UNKNOWN;
 
         // Handles moving between rooms
         private static bool Move(Commands command)
