@@ -1,61 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Zork
 {
     class Program
     {
-        private static readonly Room[,] Rooms = {
+        private static Room[,] Rooms = {
             { new Room("Rocky Trail"), new Room("South of House"), new Room("Canyon View") },
             { new Room("Forest"), new Room("West of House"), new Room("Behind House") },
             { new Room("Dense Woods"), new Room("North of House"), new Room("Clearing") }
         };
 
-        private static readonly Dictionary<string, Room> RoomMap;
-
-        static Program()
+        private static void InitializeRooms(string roomsFileName)
         {
-            RoomMap = new Dictionary<string, Room>();
-            foreach (Room room in Rooms)
-            {
-                RoomMap.Add(room.Name, room);
-            }
-        }
-
-        private static void InitializeRoomDescriptions(string roomsFileName)
-        {
-            const string fieldDelimiter = "##";
-            const int expectedFieldCount = 2;
-
-            string[] lines = File.ReadAllLines(roomsFileName);
-            foreach (string line in lines)
-            {
-                string[] fields = line.Split(fieldDelimiter);
-                if (fields.Length != expectedFieldCount)
-                {
-                    throw new InvalidDataException("Invalid record.");
-                }
-
-                string name = fields[(int)Fields.Name];
-                string description = fields[(int)Fields.Description];
-
-                RoomMap[name].Description = description;
-            }
-
-            // LINQ version
-            {/*const string fieldDelimiter = "##";
-            const int expectedFieldCount = 2;
-            var roomQuery = from line in File.ReadLines(roomsFileName)
-                            let fields = line.Split(fieldDelimiter)
-                            where fields.Length == expectedFieldCount
-                            select (Name: fields[(int)Fields.Description]);
-
-            foreach (var (Name, Description) in roomQuery)
-            {
-                RoomMap[Name].Description = Description;
-            }*/
-            }
+            Rooms = JsonConvert.DeserializeObject<Room[,]>(File.ReadAllText(roomsFileName));
         }
 
         private static (int Row, int Column) Location = (1, 1);
@@ -91,9 +51,9 @@ namespace Zork
         {
             Console.WriteLine("Welcome to Zork!");
 
-            string defaultRoomsFileName = "Rooms.txt";
+            string defaultRoomsFileName = "Rooms.json";
             string roomsFileName = (args.Length > 0 ? args[(int)CommandLineArguments.RoomsFileName] : defaultRoomsFileName);
-            InitializeRoomDescriptions(roomsFileName);
+            InitializeRooms(roomsFileName);
 
             Location = IndexOf(Rooms, "West of House");
             Assert.IsTrue(Location != (-1, -1));
@@ -189,15 +149,6 @@ namespace Zork
 
             return result;
         }
-
-        /*private static void SpawnPlayer(string roomName)
-        {
-            (Location.Row, Location.Column) = IndexOf(Rooms, roomName);
-            if ((Location.Row, Location.Column) == (-1, -1));
-            {
-                throw new Exception($"Did not find room: {roomName}");
-            }
-        }*/
 
         private static (int Row, int Column) IndexOf(Room[,] values, string valueToFind)
         {
